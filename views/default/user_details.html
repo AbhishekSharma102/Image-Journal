@@ -1,0 +1,16 @@
+{{extend 'layout.html'}}
+<h1><center>{{=items[0]['first_name']}} {{=items[0]['last_name']}}</center></h1>
+<center><img width="170px" border-radius="170px" src="{{=URL('download',args=items[0]['dp'])}}"/></center><br><br>
+{{if post:}}
+<h1>
+    Posts :
+</h1>
+{{for posts in post:}}
+    <center><div style="background-color: transparent; width:36.76%">
+        <center><img  style="width:600px; margin-bottom:1.8%; padding:0" width="170px" border-radius="170px" src="{{=URL('download', args=posts.image)}}"/></center>
+        <center><div style="display:inline-block; padding:0;"><div style="font-size:200%; margin-top:1%">
+            {{=A(posts.caption, _href=URL('show', args=posts.id))}}</div>
+            </div></center></div></center>
+<br><br>
+{{pass}}
+{{pass}}

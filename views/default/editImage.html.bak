@@ -1,0 +1,2 @@
+{{extend 'layout.html'}}
+{{=items[0]['first_name']}}

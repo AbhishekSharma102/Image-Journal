@@ -1,0 +1,123 @@
+{{extend 'layout.html'}}
+<body id="target"><center>
+<h1>
+    {{=items[0]['title']}}
+</h1>
+
+    <img style="width:600px" src="{{=URL('download', args= items[0]['image'])}}" ></img></center>
+<br>
+{{userid = db(auth.user.id == db.auth_user.id).select(db.auth_user.ALL)}}
+{{current_time = request.now.strftime("%Y-%m-%d %H:%m:%S")}}
+<br>
+<div style=" margin-left:18%;">
+    <div onclick='ajax("{{=URL('likeImage')}}", ["like", "imageid", "userid2"], "target1");'  style="width:15%; display:inline-block">
+        <form><input type="hidden" id="like" name="like" value="1" />
+              <input type="hidden" id="imageid" name="imageid" value="{{=items[0]['id']}}" />
+              <input type="hidden" id="userid2" name="userid2" value="{{=userid[0]['id']}}" /></form>
+        <img src="{{=URL('static', 'images/like1.jpg')}}" width="50" height="50" onmouseover="bigImg(this)" onmouseout="normalImg(this)">
+        <div id="target1">
+            {{temp=db((db.likes.typeof == 1) & (db.likes.imageid == items[0]['id']) & (db.likes.userid == userid[0]['id'])).select(db.likes.ALL)}}
+            {{if temp:}}
+            UnLike {{=items[0]['num_like']}}
+            {{else:}}
+            Like {{=items[0]['num_like']}}
+            {{pass}}
+        </div>
+    </div>
+    <div onclick='ajax("{{=URL('hahaImage')}}", ["haha", "imageid1", "userid3"], "target2");'  style="width:15%; display:inline-block">
+        <form><input type="hidden" id="haha" name="haha" value="2" />
+              <input type="hidden" id="imageid1" name="imageid1" value="{{=items[0]['id']}}" />
+              <input type="hidden" id="userid3" name="userid3" value="{{=userid[0]['id']}}" /></form>
+        <img src="{{=URL('static', 'images/haha2.jpg')}}" style="width:50px"width="50" height="50" onmouseover="bigImg(this)" onmouseout="normalImg(this)">
+        <div id="target2">
+            {{temp=db((db.likes.typeof == 2) & (db.likes.imageid == items[0]['id']) & (db.likes.userid == userid[0]['id'])).select(db.likes.ALL)}}
+            {{if temp:}}
+            UnHaha {{=items[0]['num_haha']}}
+            {{else:}}
+            Haha {{=items[0]['num_haha']}}
+            {{pass}}
+        </div>
+    </div>
+    <div onclick='ajax("{{=URL('angryImage')}}", ["angry", "imageid2", "userid4"], "target3");' style="width:15%; display:inline-block">
+        <form><input type="hidden" id="angry" name="angry" value="3" />
+              <input type="hidden" id="imageid2" name="imageid2" value="{{=items[0]['id']}}" />
+              <input type="hidden" id="userid4" name="userid4" value="{{=userid[0]['id']}}" /></form>
+        <img src="{{=URL('static', 'images/angry3.jpg')}}" style="width:50px" width="50" height="50" onmouseover="bigImg(this)" onmouseout="normalImg(this)">
+        <div id="target3">
+            {{temp=db((db.likes.typeof == 3) & (db.likes.imageid == items[0]['id']) & (db.likes.userid == userid[0]['id'])).select(db.likes.ALL)}}
+            {{if temp:}}
+            UnAngry {{=items[0]['num_like']}}
+            {{else:}}
+            Angry {{=items[0]['num_like']}}
+            {{pass}}
+        </div>
+    </div>
+    <div onclick='ajax("{{=URL('sadImage')}}", ["sad", "imageid3", "userid5"], "target4");' style="width:15%; display:inline-block">
+        <form><input type="hidden" id="sad" name="sad" value="4" />
+              <input type="hidden" id="imageid3" name="imageid3" value="{{=items[0]['id']}}" />
+              <input type="hidden" id="userid5" name="userid5" value="{{=userid[0]['id']}}" /></form>
+        <img src="{{=URL('static', 'images/sad4.jpg')}}" style="width:50px" width="50" height="50" onmouseover="bigImg(this)" onmouseout="normalImg(this)">
+        <div id="target4">
+            {{temp=db((db.likes.typeof == 4) & (db.likes.imageid == items[0]['id']) & (db.likes.userid == userid[0]['id'])).select(db.likes.ALL)}}
+            {{if temp:}}
+            UnSad {{=items[0]['num_like']}}
+            {{else:}}
+            Sad {{=items[0]['num_like']}}
+            {{pass}}
+        </div>
+    </div>
+    <div onclick='ajax("{{=URL('wowImage')}}", ["wow", "imageid4", "userid6"], "target5");' style="width:15%; display:inline-block">
+        <form><input type="hidden" id="wow" name="wow" value="5" />
+              <input type="hidden" id="imageid4" name="imageid4" value="{{=items[0]['id']}}" />
+              <input type="hidden" id="userid6" name="userid6" value="{{=userid[0]['id']}}" /></form>
+        <img src="{{=URL('static', 'images/wow5.jpg')}}" style="width:50px" width="50" height="50" onmouseover="bigImg(this)" onmouseout="normalImg(this)">
+        <div id="target5">
+            {{temp=db((db.likes.typeof == 5) & (db.likes.imageid == items[0]['id']) & (db.likes.userid == userid[0]['id'])).select(db.likes.ALL)}}
+            {{if temp:}}
+            UnWow {{=items[0]['num_wow']}}
+            {{else:}}
+            Wow {{=items[0]['num_wow']}}
+            {{pass}}
+        </div>
+    </div>
+</div>
+<br>
+<br>
+<ul>
+    {{for i in comments:}}
+    <div style="background-color: whitesmoke; width:80%; padding-left:3%; margin-left:8%">
+        {{image_userid = db(db.auth_user.id == i.userid).select(db.auth_user.ALL)}}
+        <img style="width:60px; margin-bottom:1.8%; padding:0" src="{{=URL('download', args= image_userid[0]['dp'])}}"></img>
+    <div style="display:inline-block; margin-left:2%; padding:0;"><div style="font-size:200%; margin-top:1%"><a href="{{=URL('show_timeline', args=i.userid)}}"><strong>{{=image_userid[0]['username']}}</strong></a></div>
+        <div style="font-size:140%;">{{=i.comment}}</div></div>
+    </div>
+<br>
+    {{pass}}
+    <div style="background-color: whitesmoke; width:80%; padding-left:3%; margin-left:8%">
+        <img style="width:60px; margin-bottom:1.8%; margin-top:1.8%; padding:0" src="{{=URL('download', args=userid[0]['dp'])}}"></img>
+<form id="commentForm" style="float:right; margin-right:70%; margin-top:1.5%">
+    <input name="comment" id="comment" />
+    <input name="image_id" id="image_id" type="hidden" value="{{=items[0]['id']}}" />
+    <input name="userid" id="userid" type="hidden" value="{{=userid[0]['id']}}" />
+    <input name="upload_time" id="upload_time" type="hidden" value="{{=current_time}}" />
+    <input type="submit" value="Comment" />
+</form>
+</div>
+
+<script>
+        jQuery('#commentForm').submit(function () {
+            ajax("{{=URL('newComment')}}", ["comment", "image_id", "userid", "upload_time"], 'target');
+            return false;
+        });
+    function bigImg(x) {
+    x.style.height = "70px";
+    x.style.width = "70px";
+}
+
+function normalImg(x) {
+    x.style.height = "50px";
+    x.style.width = "50px";
+}
+</script>
+</ul>
+</body>

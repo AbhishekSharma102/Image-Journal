@@ -1,0 +1,12 @@
+{{extend 'layout.html'}}
+
+{{for i in comments:}}
+<div style="font-size:200%">
+    {{user = db(db.auth_user.id == i.userid).select(db.auth_user.username)[0]['username']}}
+    {{=user}}
+</div>
+<div>
+    {{=i.comment}}
+</div>
+{{=MARKMIN(post.body)}}
+{{pass}}

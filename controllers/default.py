@@ -1,0 +1,268 @@
+# -*- coding: utf-8 -*-
+@auth.requires_login()
+def index():
+    redirect(URL('homepage'))
+
+@auth.requires_login()
+def timeline():
+    #allimages = db(db.images.author == auth.user.id).select(db.images.ALL, orderby=~db.images.upload_time)
+    #return dict(allimages = allimages)
+    if len(request.args):
+        page=int(request.args[0])
+    else:
+        page=0
+    items_per_page = 6
+    limitby=(page*items_per_page, (page+1)*items_per_page+1)
+    rows=db(db.images.author == auth.user.id).select(db.images.ALL, limitby=limitby, orderby=~db.images.upload_time)
+    return dict(rows=rows, page=page, items_per_page=items_per_page)
+
+@auth.requires_login()
+def homepage():
+#    allimages = db().select(db.images.ALL, orderby=~db.images.upload_time)
+    if len(request.args):
+        page=int(request.args[0])
+    else:
+        page=0
+    items_per_page = 6
+    limitby=(page*items_per_page, (page+1)*items_per_page+1)
+    rows=db().select(db.images.ALL, limitby=limitby, orderby=~db.images.upload_time)
+    return dict(rows=rows, page=page, items_per_page=items_per_page)
+
+@auth.requires_login()
+def uploadImage():
+    form = SQLFORM(db.images)
+    temp = db(auth.user.id == db.auth_user.id).select(db.auth_user.id)
+    form.vars.author = temp[0]['id']
+    form.vars.upload_time = request.now
+    if form.process().accepted:
+        session.flash = 'Image Uploaded Successfully!'
+        redirect(URL('show', args = form.vars.id))
+    else:
+        session.flash = 'Image Not Uploaded'
+    return dict(form = form)
+
+@auth.requires_login()
+def show():
+    items = db(db.images.id == request.args(0, cast=int)).select(db.images.ALL)
+    comments = db(db.comments.image_id == request.args(0,cast=int)).select(db.comments.ALL)
+    if not items:
+        redirect(URL('homepage'))
+    return dict(items = items, comments=comments)
+
+@auth.requires_login()
+def newComment():
+    form = SQLFORM(db.comments)
+    if form.accepts(request, formname=None):
+        redirect(URL('show', args = form.vars.image_id))
+        return
+#    elif form.errors:
+#        return TABLE(*[TR(k, v) for k, v in form.error.items()])
+#    else:
+#        return DIV("kat gya")
+
+@auth.requires_login()
+def editImage():
+    items = db(db.images.id == request.args(0, cast = int)).select(db.images.ALL)
+    if not items:
+        redirect(URL('homepage'))
+    form = SQLFORM(db.images, items[0]['id'], deletable = True)
+    if form.process().accepted:
+        session.flash = 'Changes Saved!'
+        test = db(db.images.id == request.args(0, cast = int)).select(db.images.ALL)
+        if not test:
+            redirect(URL('homepage'))
+        else:
+            redirect(URL('show', args = items[0]['id']))
+    else:
+        session.flash = 'Changes Not Saved!'
+    return dict(form = form)
+
+@auth.requires_login()
+def likeImage():
+    kind = int(request.vars.like)
+    imageid = int(request.vars.imageid)
+    userid = int(request.vars.userid2)
+    existss = db((db.likes.typeof == kind) & (db.likes.imageid == imageid) & (db.likes.userid == userid)).select(db.likes.ALL)
+    if existss:
+        delid = int(existss[0]['id'])
+        del db.likes[delid]
+        toedit = db(db.images.id == imageid).select(db.images.ALL)
+#        if kind == 1:
+        temp = toedit[0]['num_like']
+        if temp>= 1:
+            temp = temp-1
+        db.images[imageid]=dict(num_like = temp)
+        return DIV("Like " + str(temp))
+    else:
+        db.likes.insert(typeof = kind, imageid = imageid, userid=userid)
+#        if kind == 1:
+        temp = db(db.images.id == imageid).select(db.images.ALL)[0]
+        temp.num_like = temp.num_like + 1
+        temp.update_record()
+        return DIV("UnLike " + str(temp.num_like))
+
+@auth.requires_login()
+def hahaImage():
+    kind = int(request.vars.haha)
+    imageid = int(request.vars.imageid1)
+    userid = int(request.vars.userid3)
+    existss = db((db.likes.typeof == kind) & (db.likes.imageid == imageid) & (db.likes.userid == userid)).select(db.likes.ALL)
+#    session.flash = "yaha pe hu!!"
+    if existss:
+        delid = int(existss[0]['id'])
+        del db.likes[delid]
+        toedit = db(db.images.id == imageid).select(db.images.ALL)
+#        if kind == 1:
+        temp = toedit[0]['num_haha']
+        if temp>= 1:
+            temp = temp-1
+        db.images[imageid]=dict(num_haha = temp)
+        return DIV("Haha " + str(temp))
+    else:
+        db.likes.insert(typeof = kind, imageid = imageid, userid=userid)
+#        if kind == 1:
+        temp = db(db.images.id == imageid).select(db.images.ALL)[0]
+        temp.num_haha = temp.num_haha + 1
+        temp.update_record()
+        return DIV("UnHaha " + str(temp.num_haha))
+
+@auth.requires_login()
+def angryImage():
+    kind = int(request.vars.angry)
+    imageid = int(request.vars.imageid2)
+    userid = int(request.vars.userid4)
+    existss = db((db.likes.typeof == kind) & (db.likes.imageid == imageid) & (db.likes.userid == userid)).select(db.likes.ALL)
+#    session.flash = "yaha pe hu!!"
+    if existss:
+        delid = int(existss[0]['id'])
+        del db.likes[delid]
+        toedit = db(db.images.id == imageid).select(db.images.ALL)
+#        if kind == 1:
+        temp = toedit[0]['num_angry']
+        if temp>= 1:
+            temp = temp-1
+        db.images[imageid]=dict(num_angry = temp)
+        return DIV("Angry " + str(temp))
+    else:
+        db.likes.insert(typeof = kind, imageid = imageid, userid=userid)
+#        if kind == 1:
+        temp = db(db.images.id == imageid).select(db.images.ALL)[0]
+        temp.num_angry = temp.num_angry + 1
+        temp.update_record()
+        return DIV("UnAngry " + str(temp.num_angry))
+
+@auth.requires_login()
+def sadImage():
+    kind = int(request.vars.sad)
+    imageid = int(request.vars.imageid3)
+    userid = int(request.vars.userid5)
+    existss = db((db.likes.typeof == kind) & (db.likes.imageid == imageid) & (db.likes.userid == userid)).select(db.likes.ALL)
+#    session.flash = "yaha pe hu!!"
+    if existss:
+        delid = int(existss[0]['id'])
+        del db.likes[delid]
+        toedit = db(db.images.id == imageid).select(db.images.ALL)
+#        if kind == 1:
+        temp = toedit[0]['num_sad']
+        if temp>= 1:
+            temp = temp-1
+        db.images[imageid]=dict(num_sad = temp)
+        return DIV("Sad " + str(temp))
+    else:
+        db.likes.insert(typeof = kind, imageid = imageid, userid=userid)
+#        if kind == 1:
+        temp = db(db.images.id == imageid).select(db.images.ALL)[0]
+        temp.num_sad = temp.num_sad + 1
+        temp.update_record()
+        return DIV("UnSad " + str(temp.num_sad))
+
+@auth.requires_login()
+def wowImage():
+    kind = int(request.vars.wow)
+    imageid = int(request.vars.imageid4)
+    userid = int(request.vars.userid6)
+    existss = db((db.likes.typeof == kind) & (db.likes.imageid == imageid) & (db.likes.userid == userid)).select(db.likes.ALL)
+#    session.flash = "yaha pe hu!!"
+    if existss:
+        delid = int(existss[0]['id'])
+        del db.likes[delid]
+        toedit = db(db.images.id == imageid).select(db.images.ALL)
+#        if kind == 1:
+        temp = toedit[0]['num_wow']
+        if temp>= 1:
+            temp = temp-1
+        db.images[imageid]=dict(num_wow = temp)
+        return DIV("Wow " + str(temp))
+    else:
+        db.likes.insert(typeof = kind, imageid = imageid, userid=userid)
+#        if kind == 1:
+        temp = db(db.images.id == imageid).select(db.images.ALL)[0]
+        temp.num_wow = temp.num_wow + 1
+        temp.update_record()
+        return DIV("UnWow " + str(temp.num_wow))
+
+
+
+def user():
+    """
+    exposes:
+    http://..../[app]/default/user/login
+    http://..../[app]/default/user/logout
+    http://..../[app]/default/user/register
+    http://..../[app]/default/user/profile
+    http://..../[app]/default/user/retrieve_password
+    http://..../[app]/default/user/change_password
+    http://..../[app]/default/user/bulk_register
+    use @auth.requires_login()
+        @auth.requires_membership('group name')
+        @auth.requires_permission('read','table name',record_id)
+    to decorate functions that need access control
+    also notice there is http://..../[app]/appadmin/manage/auth to allow administrator to manage users
+    """
+    return dict(form=auth())
+
+
+@cache.action()
+def download():
+    """
+    allows downloading of uploaded files
+    http://..../[app]/default/download/[filename]
+    """
+    return response.download(request, db)
+
+
+def call():
+    """
+    exposes services. for example:
+    http://..../[app]/default/call/jsonrpc
+    decorate with @services.jsonrpc the functions to expose
+    supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv
+    """
+    return service()
+
+@auth.requires_login()
+def search():
+    form = SQLFORM.factory(Field('name',requires=IS_NOT_EMPTY()))
+    if form.accepts(request):
+        tokens = form.vars.name.split()
+        query = reduce(lambda a,b:a&b,
+                       [db.images.title.contains(k) \
+                            for k in tokens])
+        people = db(query).select()
+    else:
+        people = []
+    if form.accepts(request):
+        tokens = form.vars.name.split()
+        query = reduce(lambda a,b:a&b,
+                       [db.auth_user.username.contains(k) \
+                            for k in tokens])
+        users = db(query).select()
+    else:
+        users = []
+    return locals()
+
+@auth.requires_login()
+def user_details():
+    items = db(db.auth_user.id == request.args(0, cast=int)).select(db.auth_user.ALL)
+    post = db(db.images.author == request.args(0, cast=int)).select(db.images.ALL)
+    return locals()

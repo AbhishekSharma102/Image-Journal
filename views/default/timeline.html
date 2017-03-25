@@ -1,0 +1,31 @@
+{{extend 'layout.html'}}
+<body>
+{{curr_user = db(auth.user.id == db.auth_user.id).select(db.auth_user.ALL)}}
+<h1>
+    HELLO!! {{=curr_user[0]['first_name']}}
+</h1>
+<br>
+<br>
+<hr>
+
+<div style="display:inline">
+{{for i,row in enumerate(rows):}}
+{{if i==items_per_page: break}}
+<a href="{{=URL('show', args=row.id)}}">
+<div style="width:33%; display:inline-block; padding:2%; font-size:200%"><center>
+<img src="{{=URL('download', args=row.image)}}" style="width:250px"></img><br>
+    {{=row.title}}</center>
+    </div>
+    </a>
+{{pass}}
+</div>
+<div style="float:center; font-size:150%; text-align:center">
+{{if page:}}
+<a style="float:center" href="{{=URL(args=[page-1])}}">prev</a>
+{{pass}}
+{{if len(rows)>items_per_page:}}
+<a style="float:center" href="{{=URL(args=[page+1])}}">next</a>
+{{pass}}
+</div>
+<br>
+</body>
